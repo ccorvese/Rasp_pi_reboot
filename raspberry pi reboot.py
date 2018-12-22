@@ -12,7 +12,7 @@ def logSuccess(message):
 	print("SUCCESS: " + message)
 
 def logFailed(message):
-	print("FAILED:" + message)
+	print("FAILED: " + message)
 
 def turnOnPower():
 	GPIO.output(11,GPIO.HIGH)
@@ -34,11 +34,11 @@ def pingPublicIPs():
 		responses.append(response)
 	return responses
 
-def validPublicIPResponses(responses):
+def validPublicIPResponses():
 	return 0 in pingPublicIPs()
 
 def wait(waitTime):
-	print("Waiting" + str(waitTime) + " seconds")
+	print("Waiting " + str(waitTime) + " seconds")
 	time.sleep(waitTime)
 
 def shortReboot():
