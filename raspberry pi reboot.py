@@ -7,7 +7,7 @@ GPIO.setup(11,GPIO.OUT)
 
 public_ips = ['8.8.8.8', '8.8.4.4', '208.67.222.222', '4.2.2.2', '1.1.1.1']
 
-GATEWAY = '10.0.10.1'
+GATEWAY = '192.168.1.1'
 
 def LogEvent(message):
 	date = datetime.now().strftime("%Y-%m-%d")
@@ -110,6 +110,7 @@ def run():
 						rebootAndTestLoop()
 		else:
 			logFailed("REACHING DEFAULT GATEWAY" + " - " + GATEWAY)
+			wait(10)
 			
 
 initialize()
