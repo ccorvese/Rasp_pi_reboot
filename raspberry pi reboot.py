@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import os
 import time
+from datetime import datetime
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(11,GPIO.OUT)
 
@@ -8,25 +9,37 @@ public_ips = ['8.8.8.8', '8.8.4.4', '208.67.222.222', '4.2.2.2', '1.1.1.1']
 
 GATEWAY = '10.0.10.1'
 
+def LogEvent(message):
+	date = datetime.now().strftime("%Y-%m-%d")
+	time = datetime.now().strftime("%H:%M:%S")
+	with open("{0}-LOG.txt".format(date), "a") as logfile:
+		logfile.write(time + " - " + message + "\n")
+	logfile.close()
+
 def logSuccess(message):
 	print("SUCCESS: " + message)
-
+	
 def logFailed(message):
 	print("FAILED: " + message)
+	LogEvent("FAILED: " + message)
 
 def turnOnPower():
 	GPIO.output(11,GPIO.HIGH)
+	LogEvent("POWER RE-APPLIED")
 
 def turnOffPower():
 	GPIO.output(11,GPIO.LOW)
+	LogEvent("POWER REMOVED")
 
 def pingGateway():
 	return os.system("ping -c 1 " + GATEWAY)
 
 def validGatewayResponse():
+	print("PINGING DEFAULT GATEWAY")
 	return pingGateway() == 0
 
 def pingPublicIPs():
+	print("PINGING PUBLIC IPs")
 	responses = []
 	for ip in public_ips:
 		response = os.system("ping -c 1 " + ip)
@@ -54,13 +67,16 @@ def longReboot():
 	wait(300)
 
 def rebootAndTestLoop():
+	long_reboot_counter = 0
 	while True:
 		longReboot()
+		long_reboot_counter += 1
 		if validPublicIPResponses():
 			logSuccess("Reaching Public IP")
+			LogEvent("CONNECTIVITY RESTORED AFTER {0} REBOOT(S) - LEAVING POWER ON/RESTARTING LOOP".format(long_reboot_counter))
 			break
 		else:
-			logFailed("Reaching Public IP")
+			logFailed("REACHING PUBLIC IPs AFTER {0} ATTEMPTS".format(long_reboot_counter))
 			wait(15)
 
 
@@ -71,33 +87,30 @@ def initialize():
 
 def run():
 	while True:
-		print("Pinging Gateway")
 		if validGatewayResponse():
-			logSuccess("Reaching Gateway")
-			print("Pinging Public IPs")
+			logSuccess("REACHING GATEWAY")
 			if validPublicIPResponses():
-				logSuccess("Reaching Public IP")
+				logSuccess("REACHING PUBLIC IPs")
 			else:
-				logFailed("Reaching Public IP")
+				logFailed("REACHING PUBLIC IPs - FIRST ATTEMPT")
 				wait(15)
-				print("Pinging Public IPs")
 				if validPublicIPResponses():
-					logSuccess("Reaching Public IP")
+					logSuccess("REACHING PUBLIC IPs")
+					LogEvent("SUCCESS: REACHING PUBLIC IPs AFTER 2ND ATTEMPT - RESTARTING LOOP") 
 				else:
-					logFailed("Reaching Public IP")
-					print("Rebooting...")
+					logFailed("REACHING PUBLIC IP - SECOND ATTEMPT")
+					print("REBOOTING...")
 					shortReboot()
-					print("Pinging Public IPs")
 					if validPublicIPResponses():
-						logSuccess("Reaching Public IP")
+						logSuccess("REACHING PUBLIC IPs AFTER 1 REBOOT - RESTARTING LOOP")
+						LogEvent("SUCCESS: REACHING PUBLIC IPs AFTER 1 REBOOT - RESTARTING LOOP") 
 					else:
-						logFailed("Reaching Public IP")
-						print("Rebooting...")
+						logFailed("REACHING PUBLIC IPs AFTER 1 REBOOT - ENTERING LONG LOOP")
+						print("REBOOTING...")
 						rebootAndTestLoop()
 		else:
-			logFailed("Reaching gateway")
-
-
+			logFailed("REACHING DEFAULT GATEWAY" + " - " + GATEWAY)
+			
 
 initialize()
 run()
