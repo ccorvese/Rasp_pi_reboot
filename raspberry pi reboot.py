@@ -12,9 +12,15 @@ GATEWAY = '192.168.1.1'
 def LogEvent(message):
 	date = datetime.now().strftime("%Y-%m-%d")
 	time = datetime.now().strftime("%H:%M:%S")
-	with open("{0}-LOG.txt".format(date), "a") as logfile:
+	if os.path.exists("LOGS"):
+		logfile = open("LOGS/{0}-LOG.txt".format(date), "a")
 		logfile.write(time + " - " + message + "\n")
-	logfile.close()
+		logfile.close()
+	else:
+		os.mkdir("LOGS")
+		logfile = ("LOGS/{0}-LOG.txt".format(date), "a")
+		logfile.write(time + " - " + message + "\n")
+		logfile.close()
 
 def logSuccess(message):
 	print("SUCCESS: " + message)
