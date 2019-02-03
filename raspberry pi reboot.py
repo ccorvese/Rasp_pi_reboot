@@ -98,11 +98,9 @@ def run():
 			if validPublicIPResponses():
 				logSuccess("REACHING PUBLIC IPs")
 			else:
-				logFailed("REACHING PUBLIC IPs - FIRST ATTEMPT")
-				wait(15)
+				wait(30)
 				if validPublicIPResponses():
 					logSuccess("REACHING PUBLIC IPs")
-					LogEvent("SUCCESS: REACHING PUBLIC IPs AFTER 2ND ATTEMPT - RESTARTING LOOP") 
 				else:
 					logFailed("REACHING PUBLIC IP - SECOND ATTEMPT")
 					print("REBOOTING...")
