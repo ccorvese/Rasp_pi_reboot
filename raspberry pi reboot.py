@@ -18,7 +18,7 @@ def LogEvent(message):
 		logfile.close()
 	else:
 		os.mkdir("LOGS")
-		logfile = ("LOGS/{0}-LOG.txt".format(date), "a")
+		logfile = open("LOGS/{0}-LOG.txt".format(date), "a")
 		logfile.write(time + " - " + message + "\n")
 		logfile.close()
 
